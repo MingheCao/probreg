@@ -8,6 +8,8 @@ from . import transformation as tf
 from . import se3_op as so
 from .log import log
 
+import cupy
+
 EstepResult = namedtuple('EstepResult', ['moments'])
 MstepResult = namedtuple('MstepResult', ['transformation', 'q'])
 
@@ -42,6 +44,9 @@ class GMMTree():
                                              self._tree_level,
                                              self._lambda_s, 1.0e-4)
 
+    def set_nodes(self, nodes):
+        self._nodes = nodes
+        
     def set_callbacks(self, callbacks):
         self._callbacks = callbacks
 
@@ -50,7 +55,7 @@ class GMMTree():
                                          self._tree_level, self._lambda_c)
         return EstepResult(res)
 
-    def maximization_step(self, estep_res, trans_p):
+    def maximization_step(self, estep_res, trans_p,cuda=False):
         moments = estep_res.moments
         n = len(moments)
         amat = np.zeros((n * 3, 6))
@@ -65,7 +70,14 @@ class GMMTree():
             bmat[sl] = np.dot(nn.T, self._nodes[i][1]) - np.dot(nn.T, s)
             amat[sl, :3] = np.cross(s, nn.T)
             amat[sl, 3:] = nn.T
-        x, q, _, _ = np.linalg.lstsq(amat, bmat, rcond=-1)
+        if not cuda:
+            print("using CPU.")
+            x, q, _, _ = np.linalg.lstsq(amat, bmat, rcond=-1) ## cpu
+        else:
+            print("using CUDA.")
+            x, q, _, _ = cupy.linalg.lstsq(cupy.array(amat), cupy.array(bmat), rcond=-1) ## gpu
+            x=x.get()
+            q=q.get()
         rot, t = so.twist_mul(x, trans_p.rot, trans_p.t)
         return MstepResult(tf.RigidTransformation(rot, t), q)
 
