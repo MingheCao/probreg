@@ -69,15 +69,16 @@ class Open3dVisualizerCallback(object):
     def __init__(self, source, target, save=False,
                  keep_window=True, fov=None):
         self._vis = o3.visualization.Visualizer()
-        self._vis.create_window()
+        self._vis.create_window(width=1024, height=768)
         self._source = source
         self._target = target
         self._result = copy.deepcopy(self._source)
         self._save = save
         self._keep_window = keep_window
-        self._source.paint_uniform_color([1, 0, 0])
-        self._target.paint_uniform_color([0, 1, 0])
-        self._result.paint_uniform_color([0, 0, 1])
+        self._source.paint_uniform_color([0.9, 0.1, 0.1])
+        self._target.paint_uniform_color([0.1, 0.9, 0.1])
+        self._result.paint_uniform_color([0.1, 0.1, 0.9])
+        self._vis.get_render_option().point_size = 2
         self._vis.add_geometry(self._source)
         self._vis.add_geometry(self._target)
         self._vis.add_geometry(self._result)
@@ -99,5 +100,5 @@ class Open3dVisualizerCallback(object):
         self._vis.poll_events()
         self._vis.update_renderer()
         if self._save:
-            self._vis.capture_screen_image("image_%04d.jpg" % self._cnt)
+            self._vis.capture_screen_image("image_%04d.jpg" % self._cnt,do_render=True)
         self._cnt += 1
