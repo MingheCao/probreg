@@ -78,13 +78,17 @@ class Open3dVisualizerCallback(object):
         self._source.paint_uniform_color([0.9, 0.1, 0.1])
         self._target.paint_uniform_color([0.1, 0.9, 0.1])
         self._result.paint_uniform_color([0.1, 0.1, 0.9])
-        self._vis.get_render_option().point_size = 2
+        self._vis.get_render_option().point_size = 1
         self._vis.add_geometry(self._source)
         self._vis.add_geometry(self._target)
         self._vis.add_geometry(self._result)
         if not fov is None:
             ctr = self._vis.get_view_control()
             ctr.change_field_of_view(step=fov)
+            ctr.set_front([ 0.71611399214239602, -0.55250678197254455, 0.4265172987490935 ])
+            ctr.set_lookat([ 0.89838318938412876, 1.9992217088956057, 1.4572879726068768 ])
+            ctr.set_up([ -0.3129388391381277, 0.29206210644233466, 0.903752736615136 ])
+            ctr.set_zoom(0.71999999999999997)
         self._cnt = 0
 
     def __del__(self):
